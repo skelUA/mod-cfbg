@@ -14,7 +14,16 @@
 class CFBG_BG : public BGScript
 {
 public:
-    CFBG_BG() : BGScript("CFBG_BG") {}
+    CFBG_BG() : BGScript("CFBG_BG", {
+        ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_BEFORE_ADD_PLAYER,
+        ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_ADD_PLAYER,
+        ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_END_REWARD,
+        ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_REMOVE_PLAYER_AT_LEAVE,
+        ALLBATTLEGROUNDHOOK_ON_ADD_GROUP,
+        ALLBATTLEGROUNDHOOK_CAN_FILL_PLAYERS_TO_BG,
+        ALLBATTLEGROUNDHOOK_IS_CHECK_NORMAL_MATCH,
+        ALLBATTLEGROUNDHOOK_CAN_SEND_MESSAGE_BG_QUEUE
+    }) {}
 
     void OnBattlegroundBeforeAddPlayer(Battleground* bg, Player* player) override
     {
@@ -92,7 +101,13 @@ public:
 class CFBG_Player : public PlayerScript
 {
 public:
-    CFBG_Player() : PlayerScript("CFBG_Player") { }
+    CFBG_Player() : PlayerScript("CFBG_Player", {
+        PLAYERHOOK_ON_LOGIN,
+        PLAYERHOOK_CAN_JOIN_IN_BATTLEGROUND_QUEUE,
+        PLAYERHOOK_ON_BEFORE_UPDATE,
+        PLAYERHOOK_ON_BEFORE_SEND_CHAT_MESSAGE,
+        PLAYERHOOK_ON_REPUTATION_CHANGE
+    }) { }
 
     void OnPlayerLogin(Player* player) override
     {
@@ -179,7 +194,9 @@ private:
 class CFBG_World : public WorldScript
 {
 public:
-    CFBG_World() : WorldScript("CFBG_World") { }
+    CFBG_World() : WorldScript("CFBG_World", {
+        WORLDHOOK_ON_AFTER_CONFIG_LOAD
+    }) { }
 
     void OnAfterConfigLoad(bool /*Reload*/) override
     {
