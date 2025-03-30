@@ -18,9 +18,19 @@ public:
 
     ChatCommandTable GetCommands() const override
     {
+        // For soap / admins
+        static ChatCommandTable cfbgGmCommands =
+        {
+            { "on", HandleCFBG_GmOn, SEC_ADMINISTRATOR, Console::Yes },
+            { "off", HandleCFBG_GmOff, SEC_ADMINISTRATOR, Console::Yes }
+        };
+
         static ChatCommandTable cfbgCommands =
         {
             { "race", HandleCFBGChooseRace, SEC_PLAYER, Console::No },
+            { "gm", cfbgGmCommands },
+            { "on", HandleCFBG_On, SEC_PLAYER, Console::No },
+            { "off", HandleCFBG_Off, SEC_PLAYER, Console::No },
         };
 
         static ChatCommandTable commandTable =
@@ -94,6 +104,88 @@ public:
         }
 
         return true;
+    }
+
+    static bool HandleCFBG_GmOn(ChatHandler* handler, Optional<PlayerIdentifier> target)
+    {
+        if (!target)
+        {
+            handler->SendErrorMessage(LANG_NO_PLAYER_FOUND);
+            return false;
+        }
+
+        const uint32 guid = target->GetGUID().GetCounter();
+
+        if (sCFBG->IsCrossFactionEnabled(guid))
+        {
+            handler->SendErrorMessage("Крос-фракція вже увімкнена.");
+            return false;
+        }
+
+        sCFBG->EnableCrossFaction(guid);
+        handler->PSendSysMessage("Крос-фракція увімкнена.");
+        return true;
+    }
+
+    static bool HandleCFBG_GmOff(ChatHandler* handler, Optional<PlayerIdentifier> target)
+    {
+        if (!target)
+        {
+            handler->SendErrorMessage(LANG_NO_PLAYER_FOUND);
+            return false;
+        }
+
+        const uint32 guid = target->GetGUID().GetCounter();
+
+        if (!sCFBG->IsCrossFactionEnabled(guid))
+        {
+            handler->SendErrorMessage("Крос-фракція вже вимкнена.");
+            return false;
+        }
+
+        sCFBG->DisableCrossFaction(guid);
+        handler->PSendSysMessage("Крос-фракція вимкнена.");
+        return true;
+    }
+
+    static bool HandleCFBG_On(ChatHandler* handler)
+    {
+        if (auto player = handler->GetPlayer())
+        {
+            const uint32 guid = player->GetGUID().GetCounter();
+            if (sCFBG->IsCrossFactionEnabled(guid))
+            {
+                handler->SendErrorMessage("Крос-фракція вже увімкнена.");
+                return false;
+            }
+
+            sCFBG->EnableCrossFaction(guid);
+            handler->PSendSysMessage("Крос-фракція увімкнена.");
+            return true;
+        }
+
+        handler->SendErrorMessage(LANG_NO_PLAYER_FOUND);
+        return false;
+    }
+
+    static bool HandleCFBG_Off(ChatHandler* handler)
+    {
+        if (auto player = handler->GetPlayer())
+        {
+            const uint32 guid = player->GetGUID().GetCounter();
+            if (!sCFBG->IsCrossFactionEnabled(guid))
+            {
+                handler->SendErrorMessage("Крос-фракція вже вимкнена.");
+                return false;
+            }
+
+            sCFBG->DisableCrossFaction(guid);
+            handler->PSendSysMessage("Крос-фракція вимкнена.");
+            return true;
+        }
+
+        handler->SendErrorMessage(LANG_NO_PLAYER_FOUND);
+        return false;
     }
 
     static bool IsRaceValidForClass(Player* player, uint8 fakeRace)

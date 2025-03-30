@@ -145,6 +145,11 @@ public:
     bool ShouldForgetInListPlayers(Player* player);
     bool IsPlayingNative(Player* player);
 
+    bool IsCrossFactionEnabled(GroupQueueInfo* groupInfo);
+    bool IsCrossFactionEnabled(uint32 guid);
+    void EnableCrossFaction(uint32 guid);
+    void DisableCrossFaction(uint32 guid);
+
     void ValidatePlayerForBG(Battleground* bg, Player* player);
     void SetFakeRaceAndMorph(Player* player);
     void SetFactionForRace(Player* player, uint8 Race);
@@ -189,6 +194,8 @@ private:
 
     std::array<RaceData, 12> _raceData{};
     std::array<CFBGRaceInfo, 9> _raceInfo{};
+
+    std::unordered_map<uint32, bool> _cfEnabledMap;
 
     // For config
     bool _IsEnableSystem;
