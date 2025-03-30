@@ -77,9 +77,6 @@ CrossFactionQueueInfo::CrossFactionQueueInfo(BattlegroundQueue* bgQueue)
 
 TeamId CrossFactionQueueInfo::GetLowerTeamIdInBG(GroupQueueInfo* groupInfo)
 {
-    if (!sCFBG->IsCrossFactionEnabled(groupInfo))
-        return groupInfo->teamId;
-
     int32 plCountA = PlayersCount.at(TEAM_ALLIANCE);
     int32 plCountH = PlayersCount.at(TEAM_HORDE);
     uint32 diff = std::abs(plCountA - plCountH);
@@ -247,9 +244,6 @@ uint32 CFBG::GetBGTeamSumPlayerLevel(Battleground* bg, TeamId team)
 
 TeamId CFBG::GetLowerTeamIdInBG(Battleground* bg, BattlegroundQueue* bgQueue, GroupQueueInfo* groupInfo)
 {
-    if (!IsCrossFactionEnabled(groupInfo))
-        return groupInfo->teamId;
-
     auto queueInfo = CrossFactionQueueInfo{ bgQueue };
 
     int32 plCountA = bg->GetPlayersCountByTeam(TEAM_ALLIANCE) + queueInfo.PlayersCount.at(TEAM_ALLIANCE);
@@ -269,9 +263,6 @@ TeamId CFBG::GetLowerTeamIdInBG(Battleground* bg, BattlegroundQueue* bgQueue, Gr
 
 TeamId CFBG::SelectBgTeam(Battleground* bg, GroupQueueInfo* groupInfo, CrossFactionQueueInfo* cfQueueInfo)
 {
-    if (!IsCrossFactionEnabled(groupInfo))
-        return groupInfo->teamId;
-
     auto cfGroupInfo = CrossFactionGroupInfo(groupInfo);
 
     uint32 allianceLevels = GetBGTeamSumPlayerLevel(bg, TEAM_ALLIANCE) + cfQueueInfo->SumPlayerLevel.at(TEAM_ALLIANCE);
@@ -609,56 +600,6 @@ bool CFBG::SendRealNameQuery(Player* player)
 bool CFBG::IsPlayingNative(Player* player)
 {
     return player->GetTeamId(true) == player->GetBGData().bgTeamId;
-}
-
-bool CFBG::IsCrossFactionEnabled(GroupQueueInfo* groupInfo)
-{
-    if (!groupInfo || groupInfo->Players.empty())
-        return true;
-
-    auto guid = (*groupInfo->Players.begin()).GetCounter();
-    return IsCrossFactionEnabled(guid);
-}
-
-bool CFBG::IsCrossFactionEnabled(uint32 guid)
-{
-    if (auto it = _cfEnabledMap.find(guid); it != _cfEnabledMap.end())
-        return it->second;
-
-    auto stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CROSS_FACTION_BATTLEGROUNDS);
-    stmt->SetData(0, guid);
-
-    if (auto result = CharacterDatabase.Query(stmt))
-    {
-        auto fields = result->Fetch();
-        bool enabled = fields[0].Get<bool>();
-
-        _cfEnabledMap[guid] = enabled;
-        return enabled;
-    }
-
-    _cfEnabledMap[guid] = true;
-    return true;
-}
-
-void CFBG::EnableCrossFaction(uint32 guid)
-{
-    auto stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_CROSS_FACTION_BATTLEGROUNDS);
-    stmt->SetData(0, guid);
-    stmt->SetData(1, 1);
-    CharacterDatabase.Execute(stmt);
-
-    _cfEnabledMap[guid] = true;
-}
-
-void CFBG::DisableCrossFaction(uint32 guid)
-{
-    auto stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_CROSS_FACTION_BATTLEGROUNDS);
-    stmt->SetData(0, guid);
-    stmt->SetData(1, 0);
-    CharacterDatabase.Execute(stmt);
-
-    _cfEnabledMap[guid] = false;
 }
 
 bool CFBG::CheckCrossFactionMatch(BattlegroundQueue* queue, BattlegroundBracketId bracket_id, uint32 minPlayers, uint32 maxPlayers)
