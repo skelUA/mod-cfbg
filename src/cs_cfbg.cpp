@@ -118,12 +118,12 @@ public:
 
         if (sCFBG->IsCrossFactionEnabled(guid))
         {
-            handler->SendErrorMessage("Крос-фракція вже увімкнена.");
+            handler->SendErrorMessage(LANG_CROSS_FACTION_ALREADY_ENABLED);
             return false;
         }
 
         sCFBG->EnableCrossFaction(guid);
-        handler->PSendSysMessage("Крос-фракція увімкнена.");
+        handler->PSendSysMessage(LANG_CROSS_FACTION_ENABLED);
         return true;
     }
 
@@ -139,12 +139,12 @@ public:
 
         if (!sCFBG->IsCrossFactionEnabled(guid))
         {
-            handler->SendErrorMessage("Крос-фракція вже вимкнена.");
+            handler->SendErrorMessage(LANG_CROSS_FACTION_ALREADY_DISABLED);
             return false;
         }
 
         sCFBG->DisableCrossFaction(guid);
-        handler->PSendSysMessage("Крос-фракція вимкнена.");
+        handler->PSendSysMessage(LANG_CROSS_FACTION_DISABLED);
         return true;
     }
 
@@ -155,12 +155,12 @@ public:
             const uint32 guid = player->GetGUID().GetCounter();
             if (sCFBG->IsCrossFactionEnabled(guid))
             {
-                handler->SendErrorMessage("Крос-фракція вже увімкнена.");
+                handler->SendErrorMessage(LANG_CROSS_FACTION_ALREADY_ENABLED);
                 return false;
             }
 
             sCFBG->EnableCrossFaction(guid);
-            handler->PSendSysMessage("Крос-фракція увімкнена.");
+            handler->PSendSysMessage(LANG_CROSS_FACTION_ENABLED);
             return true;
         }
 
@@ -175,12 +175,12 @@ public:
             const uint32 guid = player->GetGUID().GetCounter();
             if (!sCFBG->IsCrossFactionEnabled(guid))
             {
-                handler->SendErrorMessage("Крос-фракція вже вимкнена.");
+                handler->SendErrorMessage(LANG_CROSS_FACTION_ALREADY_DISABLED);
                 return false;
             }
 
             sCFBG->DisableCrossFaction(guid);
-            handler->PSendSysMessage("Крос-фракція вимкнена.");
+            handler->PSendSysMessage(LANG_CROSS_FACTION_DISABLED);
             return true;
         }
 
