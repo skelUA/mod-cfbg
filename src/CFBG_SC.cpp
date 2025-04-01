@@ -9,6 +9,7 @@
 #include "ReputationMgr.h"
 #include "ScriptMgr.h"
 #include "BattlegroundQueue.h"
+#include "Chat.h"
 
 // CFBG custom script
 class CFBG_BG : public BGScript
@@ -149,10 +150,49 @@ public:
             timeCheck -= diff;
     }
 
-    void OnPlayerBeforeSendChatMessage(Player* player, uint32& type, uint32& lang, std::string& /*msg*/) override
+    void OnPlayerBeforeSendChatMessage(Player* player, uint32& type, uint32& lang, std::string& msg) override
     {
         if (!player || !sCFBG->IsEnableSystem())
             return;
+
+        if (lang == LANG_ADDON && type == CHAT_MSG_WHISPER)
+        {
+            constexpr std::string_view prefix = "FRDM";
+            if (const std::string_view msgView(msg); msgView.substr(0, prefix.size()) == prefix)
+            {
+                if (const size_t pos = msgView.find_first_of(" \t", prefix.size()); pos != std::string_view::npos)
+                {
+                    const std::string_view command = msgView.substr(pos + 1);
+
+                    const uint32 guid = player->GetGUID().GetCounter();
+                    const bool isEnabled = sCFBG->IsCrossFactionEnabled(guid);
+
+                    if (command == "merc_off")
+                    {
+                        if (isEnabled)
+                            sCFBG->DisableCrossFaction(guid);
+                    }
+                    else if (command == "merc_on")
+                    {
+                        if (!isEnabled)
+                            sCFBG->EnableCrossFaction(guid);
+                    }
+                    else if (command == "merc_get")
+                    {
+                        WorldPacket data;
+                        ChatHandler::BuildChatPacket(
+                            data,
+                            CHAT_MSG_WHISPER,
+                            LANG_ADDON,
+                            player,
+                            player,
+                            std::string("FRDM\t") + (isEnabled ? "merc_on" : "merc_off")
+                        );
+                        player->GetSession()->SendPacket(&data);
+                    }
+                }
+            }
+        }
 
         Battleground* bg = player->GetBattleground();
 
