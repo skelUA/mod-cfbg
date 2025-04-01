@@ -179,16 +179,7 @@ public:
                     }
                     else if (command == "merc_get")
                     {
-                        WorldPacket data;
-                        ChatHandler::BuildChatPacket(
-                            data,
-                            CHAT_MSG_WHISPER,
-                            LANG_ADDON,
-                            player,
-                            player,
-                            std::string("FRDM\t") + (isEnabled ? "merc_on" : "merc_off")
-                        );
-                        player->GetSession()->SendPacket(&data);
+                        sCFBG->SendCrossFactionStatus(player, isEnabled);
                     }
                 }
             }

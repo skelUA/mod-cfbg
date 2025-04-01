@@ -160,6 +160,7 @@ public:
             }
 
             sCFBG->EnableCrossFaction(guid);
+            sCFBG->SendCrossFactionStatus(player, true);
             handler->PSendSysMessage(LANG_CROSS_FACTION_ENABLED);
             return true;
         }
@@ -180,6 +181,7 @@ public:
             }
 
             sCFBG->DisableCrossFaction(guid);
+            sCFBG->SendCrossFactionStatus(player, false);
             handler->PSendSysMessage(LANG_CROSS_FACTION_DISABLED);
             return true;
         }

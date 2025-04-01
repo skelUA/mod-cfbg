@@ -149,6 +149,7 @@ public:
     bool IsCrossFactionEnabled(uint32 guid);
     void EnableCrossFaction(uint32 guid);
     void DisableCrossFaction(uint32 guid);
+    void SendCrossFactionStatus(Player* player, bool isEnabled);
 
     void ValidatePlayerForBG(Battleground* bg, Player* player);
     void SetFakeRaceAndMorph(Player* player);

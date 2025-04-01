@@ -661,6 +661,23 @@ void CFBG::DisableCrossFaction(uint32 guid)
     _cfEnabledMap[guid] = false;
 }
 
+void CFBG::SendCrossFactionStatus(Player* player, bool isEnabled)
+{
+    if (!player)
+        return;
+
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(
+        data,
+        CHAT_MSG_WHISPER,
+        LANG_ADDON,
+        player,
+        player,
+        std::string("FRDM\t") + (isEnabled ? "merc_on" : "merc_off")
+    );
+    player->GetSession()->SendPacket(&data);
+}
+
 bool CFBG::CheckCrossFactionMatch(BattlegroundQueue* queue, BattlegroundBracketId bracket_id, uint32 minPlayers, uint32 maxPlayers)
 {
     if (!IsEnableSystem())
