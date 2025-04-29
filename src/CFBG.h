@@ -145,7 +145,7 @@ public:
     bool ShouldForgetInListPlayers(Player* player);
     bool IsPlayingNative(Player* player);
 
-    bool IsCrossFactionEnabled(GroupQueueInfo* groupInfo);
+    bool IsCrossFactionEnabled(GroupQueueInfo const *groupInfo);
     bool IsCrossFactionEnabled(uint32 guid);
     void EnableCrossFaction(uint32 guid);
     void DisableCrossFaction(uint32 guid);

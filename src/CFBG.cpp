@@ -247,10 +247,10 @@ uint32 CFBG::GetBGTeamSumPlayerLevel(Battleground* bg, TeamId team)
 
 TeamId CFBG::GetLowerTeamIdInBG(Battleground* bg, BattlegroundQueue* bgQueue, GroupQueueInfo* groupInfo)
 {
+    auto queueInfo = CrossFactionQueueInfo{ bgQueue };
+
     if (!IsCrossFactionEnabled(groupInfo))
         return groupInfo->teamId;
-
-    auto queueInfo = CrossFactionQueueInfo{ bgQueue };
 
     int32 plCountA = bg->GetPlayersCountByTeam(TEAM_ALLIANCE) + queueInfo.PlayersCount.at(TEAM_ALLIANCE);
     int32 plCountH = bg->GetPlayersCountByTeam(TEAM_HORDE) + queueInfo.PlayersCount.at(TEAM_HORDE);
@@ -269,9 +269,6 @@ TeamId CFBG::GetLowerTeamIdInBG(Battleground* bg, BattlegroundQueue* bgQueue, Gr
 
 TeamId CFBG::SelectBgTeam(Battleground* bg, GroupQueueInfo* groupInfo, CrossFactionQueueInfo* cfQueueInfo)
 {
-    if (!IsCrossFactionEnabled(groupInfo))
-        return groupInfo->teamId;
-
     auto cfGroupInfo = CrossFactionGroupInfo(groupInfo);
 
     uint32 allianceLevels = GetBGTeamSumPlayerLevel(bg, TEAM_ALLIANCE) + cfQueueInfo->SumPlayerLevel.at(TEAM_ALLIANCE);
@@ -611,12 +608,12 @@ bool CFBG::IsPlayingNative(Player* player)
     return player->GetTeamId(true) == player->GetBGData().bgTeamId;
 }
 
-bool CFBG::IsCrossFactionEnabled(GroupQueueInfo* groupInfo)
+bool CFBG::IsCrossFactionEnabled(GroupQueueInfo const* groupInfo)
 {
     if (!groupInfo || groupInfo->Players.empty())
         return true;
 
-    auto guid = (*groupInfo->Players.begin()).GetCounter();
+    auto guid = groupInfo->Players.begin()->GetCounter();
     return IsCrossFactionEnabled(guid);
 }
 
@@ -737,7 +734,16 @@ bool CFBG::FillPlayersToCFBG(BattlegroundQueue* bgqueue, Battleground* bg, Battl
     GroupsList groups{ bgqueue->m_QueuedGroups[bracket_id][BG_QUEUE_CFBG].begin(), bgqueue->m_QueuedGroups[bracket_id][BG_QUEUE_CFBG].end() };
 
     // Sort for check same groups
-    std::sort(groups.begin(), groups.end(), [](GroupQueueInfo const* a, GroupQueueInfo const* b) { return a->Players.size() < b->Players.size(); });
+    std::ranges::sort(groups,
+                      [this](GroupQueueInfo const* a, GroupQueueInfo const* b) {
+                          if (a->Players.size() != b->Players.size())
+                              return a->Players.size() < b->Players.size();
+
+                          if (IsCrossFactionEnabled(a) != IsCrossFactionEnabled(b))
+                              return IsCrossFactionEnabled(a) && !IsCrossFactionEnabled(b);
+
+                          return a->JoinTime < b->JoinTime;
+                      });
 
     std::array<std::size_t, 2> playersInvitedToBGCount{};
 
@@ -808,7 +814,13 @@ bool CFBG::FillPlayersToCFBG(BattlegroundQueue* bgqueue, Battleground* bg, Battl
     }
 
     // Sort with join time (default)
-    std::sort(groups.begin(), groups.end(), [](GroupQueueInfo const* a, GroupQueueInfo const* b) { return a->JoinTime < b->JoinTime; });
+    std::ranges::sort(groups,
+                      [this](GroupQueueInfo const* a, GroupQueueInfo const* b) {
+                          if (IsCrossFactionEnabled(a) != IsCrossFactionEnabled(b))
+                              return IsCrossFactionEnabled(a) && !IsCrossFactionEnabled(b);
+
+                          return a->JoinTime < b->JoinTime;
+                      });
 
     if (IsEnableEvenTeams())
     {
