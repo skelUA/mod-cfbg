@@ -175,6 +175,7 @@ public:
     inline auto GetRaceInfo() { return &_raceInfo; }
 
     void OnAddGroupToBGQueue(GroupQueueInfo* ginfo, Group* group);
+    [[nodiscard]] bool PlayerOptIn() const { return _playerOptIn; }
 
 private:
     bool isClassJoining(uint8 _class, Player* player, uint32 minLevel);
@@ -207,6 +208,7 @@ private:
     bool _IsEnableResetCooldowns;
     bool _showPlayerName;
     bool _randomizeRaces;
+    bool _playerOptIn;
     uint32 _EvenTeamsMaxPlayersThreshold;
     uint32 _MaxPlayersCountInGroup;
     uint8 _balanceClassMinLevel;

@@ -196,6 +196,7 @@ void CFBG::LoadConfig()
     _balanceClassMaxLevel = sConfigMgr->GetOption<uint8>("CFBG.BalancedTeams.Class.MaxLevel", 19);
     _balanceClassLevelDiff = sConfigMgr->GetOption<uint8>("CFBG.BalancedTeams.Class.LevelDiff", 2);
     _randomizeRaces = sConfigMgr->GetOption<bool>("CFBG.RandomRaceSelection", true);
+    _playerOptIn = sConfigMgr->GetOption<bool>("CFBG.PlayerOptIn", false);
 }
 
 uint32 CFBG::GetBGTeamAverageItemLevel(Battleground* bg, TeamId team)
@@ -619,6 +620,9 @@ bool CFBG::IsCrossFactionEnabled(GroupQueueInfo const* groupInfo)
 
 bool CFBG::IsCrossFactionEnabled(uint32 guid)
 {
+    if (!PlayerOptIn())
+        return true;
+
     if (auto it = _cfEnabledMap.find(guid); it != _cfEnabledMap.end())
         return it->second;
 

@@ -111,7 +111,7 @@ public:
         if (!target)
         {
             handler->SendErrorMessage(LANG_NO_PLAYER_FOUND);
-            return false;
+            return true;
         }
 
         const uint32 guid = target->GetGUID().GetCounter();
@@ -119,7 +119,7 @@ public:
         if (sCFBG->IsCrossFactionEnabled(guid))
         {
             handler->SendErrorMessage(LANG_CROSS_FACTION_ALREADY_ENABLED);
-            return false;
+            return true;
         }
 
         sCFBG->EnableCrossFaction(guid);
@@ -132,7 +132,7 @@ public:
         if (!target)
         {
             handler->SendErrorMessage(LANG_NO_PLAYER_FOUND);
-            return false;
+            return true;
         }
 
         const uint32 guid = target->GetGUID().GetCounter();
@@ -140,7 +140,7 @@ public:
         if (!sCFBG->IsCrossFactionEnabled(guid))
         {
             handler->SendErrorMessage(LANG_CROSS_FACTION_ALREADY_DISABLED);
-            return false;
+            return true;
         }
 
         sCFBG->DisableCrossFaction(guid);
@@ -150,13 +150,19 @@ public:
 
     static bool HandleCFBG_On(ChatHandler* handler)
     {
+        if (!sCFBG->PlayerOptIn())
+        {
+            handler->SendErrorMessage(LANG_CROSS_FACTION_NOT_AVAILABLE);
+            return true;
+        }
+
         if (auto player = handler->GetPlayer())
         {
             const uint32 guid = player->GetGUID().GetCounter();
             if (sCFBG->IsCrossFactionEnabled(guid))
             {
                 handler->SendErrorMessage(LANG_CROSS_FACTION_ALREADY_ENABLED);
-                return false;
+                return true;
             }
 
             sCFBG->EnableCrossFaction(guid);
@@ -166,18 +172,24 @@ public:
         }
 
         handler->SendErrorMessage(LANG_NO_PLAYER_FOUND);
-        return false;
+        return true;
     }
 
     static bool HandleCFBG_Off(ChatHandler* handler)
     {
+        if (!sCFBG->PlayerOptIn())
+        {
+            handler->SendErrorMessage(LANG_CROSS_FACTION_NOT_AVAILABLE);
+            return true;
+        }
+
         if (auto player = handler->GetPlayer())
         {
             const uint32 guid = player->GetGUID().GetCounter();
             if (!sCFBG->IsCrossFactionEnabled(guid))
             {
                 handler->SendErrorMessage(LANG_CROSS_FACTION_ALREADY_DISABLED);
-                return false;
+                return true;
             }
 
             sCFBG->DisableCrossFaction(guid);
@@ -187,7 +199,7 @@ public:
         }
 
         handler->SendErrorMessage(LANG_NO_PLAYER_FOUND);
-        return false;
+        return true;
     }
 
     static bool IsRaceValidForClass(Player* player, uint8 fakeRace)

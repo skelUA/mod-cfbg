@@ -61,6 +61,11 @@
 #       Description: allows players to choose the race they will be morphed into when joining battlegrounds as the opposite team.
 #       Default: 1 - Random
 #                0 - Player choice
+#
+#   CFBG.PlayerOptIn
+#       Description: Allow player to choose whether to participate in cross-faction battlegrounds
+#       Default: 0 - Disabled
+#                1 - Enabled
 
 CFBG.Enable = 1
 CFBG.BalancedTeams = 1
